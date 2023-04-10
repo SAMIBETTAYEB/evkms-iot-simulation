@@ -1,0 +1,18 @@
+[package]
+name = "evkms_metrics_simulation"
+version = "0.1.0"
+edition = "2021"
+authors = ["Sami Bettayeb <sami3639@gmail.com>"]
+
+[[bin]]
+name = "evkms_metrics_simulation"
+path = "src/main.rs"
+
+[lib]
+name = "evkms_metrics_simulation"
+path = "src/lib.rs"
+
+[dependencies]
+dotenv = "0.15.0"
+lazy_static = "1.4.0"
+rand = "0.8.4"
