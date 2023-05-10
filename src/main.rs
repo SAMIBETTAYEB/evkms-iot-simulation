@@ -139,8 +139,8 @@ fn simulate_pairwise_communication_energy_consumption() {
         for iteration in 0..1000 {
             println!("Simulation: Mac size: {}, iteration: {}", i, iteration);
             let nodes: NodesVec = initialize_network(
-                i,
-                i / 10,
+                number_of_nodes,
+                number_of_nodes / 10,
                 number_of_min_possible_neighbors,
                 number_of_max_possible_neighbors,
             );
