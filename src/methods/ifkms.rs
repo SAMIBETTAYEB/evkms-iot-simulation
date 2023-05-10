@@ -51,11 +51,17 @@ pub fn number_of_pairwise_encryptions(_nodes: NodesVec) -> u32 {
     0
 }
 
-pub fn pairwise_communication_energy(nodes: NodesVec) -> f32 {
+pub fn pairwise_communication_energy(nodes: NodesVec, mac_size: u32) -> f32 {
     let mut energy = 0.0;
     for node in nodes.iter() {
-        energy += node.neighbors.len() as f32 * *SENT_MESSAGE_SIZE as f32 * *EPSB;
-        energy += node.neighbors.len() as f32 * *RECEIVED_MESSAGE_SIZE as f32 * *EPRB;
+        if node.kind == NodeType::Gateway {
+            continue;
+        }
+        energy += node.neighbors.len() as f32 * mac_size as f32 * *EPSB;
+        energy += node.neighbors.len() as f32 * mac_size as f32 * *EPRB;
+        // Only 1/2 of nodes will send reply with an encrypted message and the other half will receive it
+        energy += node.neighbors.len() as f32 * mac_size as f32 * *EPSB / 2 as f32;
+        energy += node.neighbors.len() as f32 * mac_size as f32 * *EPRB / 2 as f32;
     }
     energy
 }

@@ -51,11 +51,14 @@ pub fn number_of_pairwise_encryptions(_nodes: NodesVec) -> u32 {
     0
 }
 
-pub fn pairwise_communication_energy(nodes: NodesVec) -> f32 {
+pub fn pairwise_communication_energy(nodes: NodesVec, mac_size: u32) -> f32 {
     let mut energy = 0.0;
     for node in nodes.iter() {
-        energy += node.neighbors.len() as f32 * *SENT_MESSAGE_SIZE as f32 * *EPSB;
-        energy += node.neighbors.len() as f32 * *RECEIVED_MESSAGE_SIZE as f32 * *EPRB;
+        if node.kind == NodeType::Gateway {
+            continue;
+        }
+        energy += node.neighbors.len() as f32 * mac_size as f32 * *EPSB;
+        energy += node.neighbors.len() as f32 * mac_size as f32 * *EPRB;
     }
     energy
 }
