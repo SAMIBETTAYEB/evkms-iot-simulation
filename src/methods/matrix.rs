@@ -73,8 +73,7 @@ pub fn pairwise_communication_energy(nodes: NodesVec, mac_size: u32) -> f32 {
         if node.kind == NodeType::Gateway {
             continue;
         }
-        energy += node.neighbors.len() as f32
-            * (*MESSAGE_TYPE_SIZE + *NODE_ID_SIZE + *NONCE_SIZE + mac_size as f32)
+        energy += (*MESSAGE_TYPE_SIZE + *NODE_ID_SIZE + *NONCE_SIZE + mac_size as f32)
             * *EPSB;
         energy += node.neighbors.len() as f32
             * (*MESSAGE_TYPE_SIZE + *NODE_ID_SIZE + *NONCE_SIZE + mac_size as f32)
