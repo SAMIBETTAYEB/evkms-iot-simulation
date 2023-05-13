@@ -29,6 +29,18 @@ lazy_static! {
         .unwrap_or(16.to_string())
         .parse::<u32>()
         .unwrap();
+    static ref NODE_ID_SIZE: f32 = env::var("NODE_ID_SIZE")
+        .unwrap_or(4.to_string())
+        .parse::<f32>()
+        .unwrap();
+    static ref MESSAGE_TYPE_SIZE: f32 = env::var("NODE_ID_SIZE")
+        .unwrap_or(4.to_string())
+        .parse::<f32>()
+        .unwrap();
+    static ref NONCE_SIZE: f32 = env::var("NODE_ID_SIZE")
+        .unwrap_or(4.to_string())
+        .parse::<f32>()
+        .unwrap();
 }
 
 pub fn number_of_multiplications(nodes: NodesVec) -> u32 {
@@ -57,8 +69,11 @@ pub fn pairwise_communication_energy(nodes: NodesVec, mac_size: u32) -> f32 {
         if node.kind == NodeType::Gateway {
             continue;
         }
-        energy += node.neighbors.len() as f32 * mac_size as f32 * *EPSB;
-        energy += node.neighbors.len() as f32 * mac_size as f32 * *EPRB;
+        energy += node.neighbors.len() as f32
+            * (*MESSAGE_TYPE_SIZE + *NODE_ID_SIZE + *NONCE_SIZE + mac_size as f32)
+            * *EPSB;
+        energy += node.neighbors.len() as f32
+        * (*MESSAGE_TYPE_SIZE + *NODE_ID_SIZE + *NONCE_SIZE + mac_size as f32) * *EPRB;
     }
     energy
 }
