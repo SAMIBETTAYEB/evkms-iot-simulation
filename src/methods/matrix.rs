@@ -37,11 +37,11 @@ lazy_static! {
         .unwrap_or(4.to_string())
         .parse::<f32>()
         .unwrap();
-    static ref MESSAGE_TYPE_SIZE: f32 = env::var("NODE_ID_SIZE")
-        .unwrap_or(4.to_string())
+    static ref MESSAGE_TYPE_SIZE: f32 = env::var("MESSAGE_TYPE_SIZE")
+        .unwrap_or(1.to_string())
         .parse::<f32>()
         .unwrap();
-    static ref NONCE_SIZE: f32 = env::var("NODE_ID_SIZE")
+    static ref NONCE_SIZE: f32 = env::var("NONCE_SIZE")
         .unwrap_or(4.to_string())
         .parse::<f32>()
         .unwrap();

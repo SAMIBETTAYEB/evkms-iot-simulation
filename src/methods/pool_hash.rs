@@ -29,23 +29,32 @@ lazy_static! {
         .unwrap_or(1000.to_string())
         .parse::<u32>()
         .unwrap();
-    static ref NODE_ID_SIZE: u32 = env::var("NODE_ID_SIZE")
+    static ref NODE_ID_SIZE: f32 = env::var("NODE_ID_SIZE")
         .unwrap_or(4.to_string())
-        .parse::<u32>()
+        .parse::<f32>()
         .unwrap();
     static ref AES_BLOCK_SIZE: u32 = env::var("AES_BLOCK_SIZE")
         .unwrap_or(16.to_string())
         .parse::<u32>()
+        .unwrap();
+    static ref MESSAGE_TYPE_SIZE: f32 = env::var("MESSAGE_TYPE_SIZE")
+        .unwrap_or(1.to_string())
+        .parse::<f32>()
+        .unwrap();
+    static ref NONCE_SIZE: f32 = env::var("NONCE_SIZE")
+        .unwrap_or(4.to_string())
+        .parse::<f32>()
         .unwrap();
 }
 
 pub fn pairwise_communication_energy(nodes: NodesVec, aes_block_size: u32) -> f32 {
     let mut energy = 0.0;
         let neighbors_ids_size = *NODE_ID_SIZE as f32 ** KEY_RING_SIZE as f32;
-        let message = if neighbors_ids_size % aes_block_size as f32 == 0.0 {
-            neighbors_ids_size
+        let message_size_before_encryption: f32 = *MESSAGE_TYPE_SIZE + *NODE_ID_SIZE + *NONCE_SIZE + neighbors_ids_size;
+        let message = if message_size_before_encryption % aes_block_size as f32 == 0.0 {
+            message_size_before_encryption
         } else {
-            (neighbors_ids_size as u32 / aes_block_size + 1) as f32 * aes_block_size as f32
+            (message_size_before_encryption as u32 / aes_block_size + 1) as f32 * aes_block_size as f32
         };
         let sent_energy = message as f32 * *EPSB;
     for node in nodes.iter() {
