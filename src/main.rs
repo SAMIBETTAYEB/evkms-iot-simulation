@@ -11,8 +11,7 @@ use evkms_metrics_simulation::{
 
 fn main() {
     dotenv().ok();
-    simulate();
-    simulate_pairwise_communication_energy_consumption();
+    simulate_pairwise_communication();
 }
 
 fn simulate() {
@@ -158,4 +157,80 @@ fn simulate_pairwise_communication_energy_consumption() {
     println!("matrix_energy: {:?}", matrix_energy);
     println!("ifkms_energy: {:?}", ifkms_energy);
     println!("pool_hash_energy: {:?}", pool_hash_energy);
+}
+
+fn simulate_pairwise_communication() {
+    let number_of_nodes = env::var("NUMBER_OF_NODES")
+        .expect("NUMBER_OF_NODES must be set")
+        .parse::<i32>()
+        .expect("NUMBER_OF_NODES must be a number");
+    let number_of_gateways = env::var("NUMBER_OF_GATEWAYS")
+        .expect("NUMBER_OF_GATEWAYS must be set")
+        .parse::<i32>()
+        .expect("NUMBER_OF_GATEWAYS must be a number");
+    let number_of_min_possible_neighbors = env::var("NUMBER_OF_MIN_POSSIBLE_NEIGHBORS")
+        .expect("NUMBER_OF_MIN_POSSIBLE_NEIGHBORS must be set")
+        .parse::<i32>()
+        .expect("NUMBER_OF_MIN_POSSIBLE_NEIGHBORS must be a number");
+    let number_of_max_possible_neighbors = env::var("NUMBER_OF_MAX_POSSIBLE_NEIGHBORS")
+        .expect("NUMBER_OF_MAX_POSSIBLE_NEIGHBORS must be set")
+        .parse::<i32>()
+        .expect("NUMBER_OF_MAX_POSSIBLE_NEIGHBORS must be a number");
+    let number_of_gateway_members = env::var("NUMBER_OF_GATEWAY_MEMBERS")
+        .expect("NUMBER_OF_GATEWAY_MEMBERS must be set")
+        .parse::<i32>()
+        .expect("NUMBER_OF_GATEWAY_MEMBERS must be a number");
+    let min_mac_size = 16;
+    let max_mac_size = 64;
+    let mut evkms_sent: Vec<(u32, f32)> = Vec::new();
+    let mut evkms_received: Vec<(u32, f32)> = Vec::new();
+    let mut matrix_sent: Vec<(u32, f32)> = Vec::new();
+    let mut matrix_received: Vec<(u32, f32)> = Vec::new();
+    let mut ifkms_sent: Vec<(u32, f32)> = Vec::new();
+    let mut ifkms_received: Vec<(u32, f32)> = Vec::new();
+    let mut pool_hash_sent: Vec<(u32, f32)> = Vec::new();
+    let mut pool_hash_received: Vec<(u32, f32)> = Vec::new();
+    for i in (min_mac_size..=max_mac_size).step_by(4) {
+        let mut evkms_sent_sum: f32 = 0.0;
+        let mut evkms_received_sum: f32 = 0.0;
+        let mut matrix_sent_sum: f32 = 0.0;
+        let mut matrix_received_sum: f32 = 0.0;
+        let mut ifkms_sent_sum: f32 = 0.0;
+        let mut ifkms_received_sum: f32 = 0.0;
+        let mut pool_hash_sent_sum: f32 = 0.0;
+        let mut pool_hash_received_sum: f32 = 0.0;
+        for iteration in 0..1000 {
+            println!("Simulation: Mac size: {}, iteration: {}", i, iteration);
+            let nodes: NodesVec = initialize_network(
+                number_of_nodes,
+                number_of_nodes / 10,
+                number_of_min_possible_neighbors,
+                number_of_max_possible_neighbors,
+            );
+            evkms_sent_sum += evkms::pairwise_communication_sent(nodes.clone(), i as u32);
+            evkms_received_sum += evkms::pairwise_communication_received(nodes.clone(), i as u32);
+            matrix_sent_sum += matrix::pairwise_communication_sent(nodes.clone(), i as u32);
+            matrix_received_sum += matrix::pairwise_communication_received(nodes.clone(), i as u32);
+            ifkms_sent_sum += ifkms::pairwise_communication_sent(nodes.clone(), i as u32);
+            ifkms_received_sum += ifkms::pairwise_communication_received(nodes.clone(), i as u32);
+            pool_hash_sent_sum += pool_hash::pairwise_communication_sent(nodes.clone(), i as u32);
+            pool_hash_received_sum += pool_hash::pairwise_communication_received(nodes.clone(), i as u32);
+        }
+        evkms_sent.push((i as u32, evkms_sent_sum / 1000.0));
+        evkms_received.push((i as u32, evkms_received_sum / 1000.0));
+        matrix_sent.push((i as u32, matrix_sent_sum / 1000.0));
+        matrix_received.push((i as u32, matrix_received_sum / 1000.0));
+        ifkms_sent.push((i as u32, ifkms_sent_sum / 1000.0));
+        ifkms_received.push((i as u32, ifkms_received_sum / 1000.0));
+        pool_hash_sent.push((i as u32, pool_hash_sent_sum / 1000.0));
+        pool_hash_received.push((i as u32, pool_hash_received_sum / 1000.0));
+    }
+    println!("evkms_sent: {:?}", evkms_sent);
+    println!("evkms_received: {:?}", evkms_received);
+    println!("matrix_sent: {:?}", matrix_sent);
+    println!("matrix_received: {:?}", matrix_received);
+    println!("ifkms_sent: {:?}", ifkms_sent);
+    println!("ifkms_received: {:?}", ifkms_received);
+    println!("pool_hash_sent: {:?}", pool_hash_sent);
+    println!("pool_hash_received: {:?}", pool_hash_received);
 }

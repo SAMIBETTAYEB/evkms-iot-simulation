@@ -49,14 +49,15 @@ lazy_static! {
 
 pub fn pairwise_communication_energy(nodes: NodesVec, aes_block_size: u32) -> f32 {
     let mut energy = 0.0;
-        let neighbors_ids_size = *NODE_ID_SIZE as f32 ** KEY_RING_SIZE as f32;
-        let message_size_before_encryption: f32 = *MESSAGE_TYPE_SIZE + *NODE_ID_SIZE + *NONCE_SIZE + neighbors_ids_size;
-        let message = if message_size_before_encryption % aes_block_size as f32 == 0.0 {
-            message_size_before_encryption
-        } else {
-            (message_size_before_encryption as u32 / aes_block_size + 1) as f32 * aes_block_size as f32
-        };
-        let sent_energy = message as f32 * *EPSB;
+    let neighbors_ids_size = *NODE_ID_SIZE as f32 * *KEY_RING_SIZE as f32;
+    let message_size_before_encryption: f32 =
+        *MESSAGE_TYPE_SIZE + *NODE_ID_SIZE + *NONCE_SIZE + neighbors_ids_size;
+    let message = if message_size_before_encryption % aes_block_size as f32 == 0.0 {
+        message_size_before_encryption
+    } else {
+        (message_size_before_encryption as u32 / aes_block_size + 1) as f32 * aes_block_size as f32
+    };
+    let sent_energy = message as f32 * *EPSB;
     for node in nodes.iter() {
         if node.kind == NodeType::Gateway {
             continue;
@@ -66,4 +67,39 @@ pub fn pairwise_communication_energy(nodes: NodesVec, aes_block_size: u32) -> f3
         energy += sent_energy + received_energy;
     }
     energy
+}
+
+pub fn pairwise_communication_sent(nodes: NodesVec, aes_block_size: u32) -> f32 {
+    let neighbors_ids_size = *NODE_ID_SIZE as f32 * *KEY_RING_SIZE as f32;
+    let message_size_before_encryption: f32 =
+        *MESSAGE_TYPE_SIZE + *NODE_ID_SIZE + *NONCE_SIZE + neighbors_ids_size;
+    let message = if message_size_before_encryption % aes_block_size as f32 == 0.0 {
+        message_size_before_encryption
+    } else {
+        (message_size_before_encryption as u32 / aes_block_size + 1) as f32 * aes_block_size as f32
+    };
+    // Get the number of nodes that are not gateways
+    let constrained_nodes_count = nodes.iter().filter(|n| n.kind != NodeType::Gateway).count();
+    message * constrained_nodes_count as f32
+}
+
+pub fn pairwise_communication_received(nodes: NodesVec, aes_block_size: u32) -> f32 {
+    let mut received = 0.0;
+    let neighbors_ids_size = *NODE_ID_SIZE as f32 * *KEY_RING_SIZE as f32;
+    let message_size_before_encryption: f32 =
+        *MESSAGE_TYPE_SIZE + *NODE_ID_SIZE + *NONCE_SIZE + neighbors_ids_size;
+    let message = if message_size_before_encryption % aes_block_size as f32 == 0.0 {
+        message_size_before_encryption
+    } else {
+        (message_size_before_encryption as u32 / aes_block_size + 1) as f32 * aes_block_size as f32
+    };
+    for node in nodes.iter() {
+        if node.kind == NodeType::Gateway {
+            continue;
+        }
+        // For each neighbor of this node, we receive NODE_ID_SIZE * KEY_RING_SIZE bytes
+        let received_message = node.neighbors.len() as f32 * message;
+        received += received_message;
+    }
+    received
 }

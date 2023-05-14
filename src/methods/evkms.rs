@@ -77,6 +77,29 @@ pub fn pairwise_communication_energy(nodes: NodesVec, mac_size: u32) -> f32 {
     energy
 }
 
+pub fn pairwise_communication_sent(nodes: NodesVec, mac_size: u32) -> f32 {
+    let mut sent = 0.0;
+    for node in nodes.iter() {
+        if node.kind == NodeType::Gateway {
+            continue;
+        }
+        sent += *MESSAGE_TYPE_SIZE + *NODE_ID_SIZE + *NONCE_SIZE + mac_size as f32;
+    }
+    sent
+}
+
+pub fn pairwise_communication_received(nodes: NodesVec, mac_size: u32) -> f32 {
+    let mut received = 0.0;
+    for node in nodes.iter() {
+        if node.kind == NodeType::Gateway {
+            continue;
+        }
+        received += node.neighbors.len() as f32
+        * (*MESSAGE_TYPE_SIZE + *NODE_ID_SIZE + *NONCE_SIZE + mac_size as f32);
+    }
+    received
+}
+
 pub fn groupwise_communication_energy(_nodes: NodesVec) -> f32 {
     0.0
 }
